@@ -102,3 +102,6 @@ docker compose ps
 ## Лицензия
 
 Проект распространяется по лицензии [GNU General Public License v3.0](LICENSE). Его можно использовать, изучать, изменять и распространять, в том числе коммерчески. При распространении проекта или производной версии необходимо предоставить исходный код и сохранить лицензию GPLv3.
+
+buymeacoffee.com/sampsih
+Gram (TON) UQBDpkQH_ryzYKm5iiBQLuFz32SJllk4WI3drZfjQCYFHKX4
