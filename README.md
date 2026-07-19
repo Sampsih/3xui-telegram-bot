@@ -93,7 +93,6 @@ docker compose ps
 - [Решение проблем](docs/troubleshooting.md)
 - [Участие в разработке](CONTRIBUTING.md)
 - [История изменений](CHANGELOG.md)
-- [Первая публикация на GitHub](PUBLISHING.md)
 
 ## Скриншоты
 

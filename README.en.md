@@ -93,7 +93,6 @@ Read [SECURITY.en.md](SECURITY.en.md) before publishing your own fork.
 - [Troubleshooting](docs/troubleshooting.en.md)
 - [Contributing](CONTRIBUTING.en.md)
 - [Changelog](CHANGELOG.md)
-- [First GitHub publication](PUBLISHING.en.md)
 
 ## Screenshots
 

@@ -18,7 +18,6 @@ DOCUMENT_PAIRS = (
     ("docs/troubleshooting.md", "docs/troubleshooting.en.md"),
     ("CONTRIBUTING.md", "CONTRIBUTING.en.md"),
     ("SECURITY.md", "SECURITY.en.md"),
-    ("PUBLISHING.md", "PUBLISHING.en.md"),
 )
 
 CYRILLIC = re.compile(r"[А-Яа-яЁё]")
