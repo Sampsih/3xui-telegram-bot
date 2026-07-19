@@ -1,0 +1,2 @@
+# Validate with: visudo -cf /etc/sudoers.d/xuiadmin
+xuiadmin ALL=(root) NOPASSWD: /usr/local/sbin/xui-system-update, /usr/local/sbin/xui-safe-update

@@ -1,0 +1,20 @@
+{$APP_DOMAIN} {
+    encode zstd gzip
+
+    header {
+        -Server
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+        Content-Security-Policy "default-src 'self'; script-src 'self' https://telegram.org; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self' https://web.telegram.org https://*.telegram.org"
+    }
+
+    @sensitive path /api/* /health /ready
+    header @sensitive {
+        Cache-Control "no-store, max-age=0"
+        Pragma "no-cache"
+    }
+
+    reverse_proxy api:8000
+}

@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
+  echo 'Run this script as root on the managed 3x-ui server' >&2
+  exit 1
+fi
+
+public_key_file=${1:-}
+if [[ -z "$public_key_file" || ! -f "$public_key_file" ]]; then
+  echo 'Usage: install-managed-host /path/to/xuiadmin_id_ed25519.pub' >&2
+  exit 2
+fi
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+for required in xui-system-update xui-safe-update xuiadmin.sudoers; do
+  if [[ ! -f "$script_dir/$required" ]]; then
+    echo "Missing $script_dir/$required" >&2
+    exit 3
+  fi
+done
+
+if ! id xuiadmin >/dev/null 2>&1; then
+  /usr/sbin/useradd -m -s /bin/bash xuiadmin
+fi
+if /usr/bin/getent group systemd-journal >/dev/null 2>&1; then
+  /usr/sbin/usermod -aG systemd-journal xuiadmin
+fi
+
+/usr/bin/install -d -m 0700 -o xuiadmin -g xuiadmin /home/xuiadmin/.ssh
+/usr/bin/touch /home/xuiadmin/.ssh/authorized_keys
+/usr/bin/chown xuiadmin:xuiadmin /home/xuiadmin/.ssh/authorized_keys
+/usr/bin/chmod 0600 /home/xuiadmin/.ssh/authorized_keys
+
+public_key=$(<"$public_key_file")
+if [[ -z "$public_key" || "$public_key" != ssh-* ]]; then
+  echo 'The supplied file does not look like an OpenSSH public key' >&2
+  exit 4
+fi
+if ! /usr/bin/grep -qxF "$public_key" /home/xuiadmin/.ssh/authorized_keys; then
+  printf '%s\n' "$public_key" >> /home/xuiadmin/.ssh/authorized_keys
+fi
+
+/usr/bin/install -m 0755 -o root -g root "$script_dir/xui-system-update" /usr/local/sbin/xui-system-update
+/usr/bin/install -m 0755 -o root -g root "$script_dir/xui-safe-update" /usr/local/sbin/xui-safe-update
+/usr/bin/install -m 0440 -o root -g root "$script_dir/xuiadmin.sudoers" /etc/sudoers.d/xuiadmin
+/usr/sbin/visudo -cf /etc/sudoers.d/xuiadmin
+
+echo 'Managed-host prerequisites installed successfully.'
+echo 'Verify from the management host with: ssh xuiadmin@HOST sudo -n -l'

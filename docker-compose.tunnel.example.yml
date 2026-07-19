@@ -1,0 +1,36 @@
+services:
+  panel-tunnel:
+    build:
+      context: ./tunnel
+    restart: unless-stopped
+    command:
+      - -g
+      - -N
+      - -p
+      - ${TUNNEL_SSH_PORT:-22}
+      - -i
+      - /run/secrets/${TUNNEL_SSH_KEY_FILE:-id_ed25519_tunnel}
+      - -o
+      - IdentitiesOnly=yes
+      - -o
+      - StrictHostKeyChecking=yes
+      - -o
+      - UserKnownHostsFile=/run/secrets/known_hosts
+      - -o
+      - ExitOnForwardFailure=yes
+      - -o
+      - ServerAliveInterval=30
+      - -o
+      - ServerAliveCountMax=3
+      - -L
+      - 0.0.0.0:${TUNNEL_LOCAL_PORT:-28481}:127.0.0.1:${TUNNEL_REMOTE_PORT:-28481}
+      - ${TUNNEL_SSH_USER:-xuiadmin}@${TUNNEL_SSH_HOST}
+    volumes:
+      - ./secrets:/run/secrets:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    networks: [control_net]

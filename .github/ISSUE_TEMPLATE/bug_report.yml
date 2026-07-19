@@ -1,0 +1,38 @@
+name: Bug report
+description: Report a reproducible problem without secrets
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Never attach `.env`, SSH keys, client links, panel databases or unredacted logs.
+  - type: input
+    id: app-version
+    attributes:
+      label: Application version
+    validations:
+      required: true
+  - type: input
+    id: panel-version
+    attributes:
+      label: 3x-ui version
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and redacted logs
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true

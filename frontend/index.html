@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#080b12" />
+  <title>X-UI Control</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?62"></script>
+  <link rel="stylesheet" href="/app/styles.css?v=40" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M7 7.5h10M7 12h10M7 16.5h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div>
+        <p class="eyebrow">SECURE CONTROL</p>
+        <h1>X-UI Control</h1>
+      </div>
+    </div>
+    <button id="refreshBtn" class="icon-button" aria-label="Обновить" title="Обновить">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 11a8 8 0 1 0-2.34 5.66M20 11V5m0 6h-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </header>
+
+  <main>
+    <section id="notice" class="notice hidden"></section>
+
+    <section id="serverView">
+      <div class="page-intro">
+        <div>
+          <span class="section-kicker">ИНФРАСТРУКТУРА</span>
+          <h2>Ваши серверы</h2>
+          <p>Состояние, обновления и управление подключениями.</p>
+        </div>
+        <div class="connection-state"><span></span>Защищённое соединение</div>
+      </div>
+      <section id="servers" class="server-grid"></section>
+    </section>
+
+    <section id="dashboard" class="hidden">
+      <div class="server-hero server-hero--compact">
+        <div class="server-hero__top">
+          <div>
+            <button id="backBtn" class="link-button">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Серверы
+            </button>
+            <div class="server-heading server-heading--compact">
+              <div class="server-heading__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="6" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="14" width="16" height="6" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 7h.01M8 17h.01M12 7h5M12 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </div>
+              <div>
+                <div class="server-title-row"><h2 id="serverTitle"></h2><span id="dashboardStatus" class="live-pill"><i></i>Активен</span></div>
+                <p id="serverLocation" class="muted"></p>
+              </div>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button id="usersBtn" class="primary">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8-1 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Пользователи
+            </button>
+            <button id="updateSystemBtn" class="secondary warning-action">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Обновить сервер
+            </button>
+            <button id="updateXrayBtn" class="secondary">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Xray
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="statusCards" class="metric-grid metric-grid--compact"></div>
+    </section>
+
+    <section id="usersView" class="hidden">
+      <div class="server-hero users-hero server-hero--compact">
+        <div class="server-hero__top">
+          <div>
+            <button id="usersBackBtn" class="link-button">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              К серверу
+            </button>
+            <div class="server-heading server-heading--compact">
+              <div class="server-heading__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8-1 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div class="server-title-row"><h2 id="usersServerTitle">Пользователи</h2></div>
+                <p id="usersServerLocation" class="muted"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="panel create-panel">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M15 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M16 11h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <h3>Добавить пользователя</h3>
+              <p class="muted">Создание нового клиента в выбранном inbound.</p>
+            </div>
+          </div>
+        </div>
+        <form id="clientForm" class="form-grid">
+          <label class="field field-wide"><span>Inbound</span><select id="inboundSelect" required></select></label>
+          <label class="field"><span>Имя пользователя</span><input id="clientEmail" required maxlength="128" placeholder="Например, alex-phone" /></label>
+          <label class="field"><span>Лимит трафика</span><div class="input-suffix"><input id="clientTotal" type="number" min="0" step="1" value="0" /><i>ГБ</i></div></label>
+          <label class="field"><span>Срок действия</span><div class="input-suffix"><input id="clientDays" type="number" min="0" step="1" value="0" /><i>дней</i></div></label>
+          <label class="field"><span>Лимит устройств</span><input id="clientIpLimit" type="number" min="0" step="1" value="0" /></label>
+          <button type="submit" class="primary">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+            Создать пользователя
+          </button>
+        </form>
+      </section>
+
+      <section class="users-section">
+        <div class="panel-header standalone">
+          <div>
+            <span class="section-kicker">ПОДКЛЮЧЕНИЯ</span>
+            <h3>Inbounds и пользователи</h3>
+            <p class="muted">Трафик, срок действия и данные подключения.</p>
+          </div>
+        </div>
+        <div id="inbounds"></div>
+      </section>
+    </section>
+
+    <section id="versionView" class="hidden">
+      <div class="server-hero server-hero--compact version-hero">
+        <div class="server-hero__top">
+          <div>
+            <button id="versionBackBtn" class="link-button">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              К серверу
+            </button>
+            <div class="server-heading server-heading--compact">
+              <div class="server-heading__icon version-hero__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 7v5c0 4.7 3.1 7.8 8 9 4.9-1.2 8-4.3 8-9V7l-8-4Zm-3 9 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div class="server-title-row"><h2 id="versionServerTitle">Обновление 3x-ui</h2></div>
+                <p id="versionServerLocation" class="muted"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="panel release-panel">
+        <div class="release-summary">
+          <div class="release-version-block">
+            <span>Установлена</span>
+            <strong id="versionInstalled">—</strong>
+          </div>
+          <div class="release-arrow" aria-hidden="true">→</div>
+          <div class="release-version-block">
+            <span>Последняя</span>
+            <strong id="versionLatest">—</strong>
+          </div>
+          <div id="versionBadge" class="release-status">Проверка…</div>
+        </div>
+        <div class="release-meta">
+          <div>
+            <span class="section-kicker">РЕЛИЗ</span>
+            <h3 id="releaseName">Последняя версия 3x-ui</h3>
+            <p id="releaseDate" class="muted"></p>
+          </div>
+          <button id="updatePanelBtn" class="primary hidden">Обновить 3x-ui</button>
+        </div>
+        <div class="release-notes-wrap">
+          <h3>Что изменилось</h3>
+          <pre id="releaseNotes" class="release-notes">Загрузка описания релиза…</pre>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="connectionDialog">
+    <form method="dialog" class="dialog-shell">
+      <button class="dialog-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <div class="dialog-heading">
+        <div class="dialog-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 3h7v7H3V3Zm11 0h7v7h-7V3ZM3 14h7v7H3v-7Zm12 0h2v2h-2v-2Zm4 0h2v5h-2v-5Zm-4 4h2v3h-2v-3Zm2-2h2v2h-2v-2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </div>
+        <div><h3>Подключение готово</h3><p class="muted">Отсканируйте QR-код или скопируйте ссылку.</p></div>
+      </div>
+      <label id="connectionSelectField" class="field hidden"><span>Конфигурация</span><select id="connectionSelect"></select></label>
+      <div class="qr-shell"><img id="qrImage" class="qr" alt="QR-код подключения" /></div>
+      <label class="uri-field"><span>Ссылка подключения</span><textarea id="connectionUri" readonly></textarea></label>
+      <button id="copyUriBtn" type="button" class="primary full-width">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Скопировать ссылку
+      </button>
+    </form>
+  </dialog>
+
+  <dialog id="operationDialog">
+    <form method="dialog" class="dialog-shell operation-shell">
+      <button class="dialog-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <div class="dialog-heading">
+        <div class="dialog-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div><h3 id="operationTitle">Результат операции</h3><p id="operationSummary" class="muted"></p></div>
+      </div>
+      <pre id="operationOutput" class="operation-output"></pre>
+      <button type="submit" class="primary full-width">Закрыть</button>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/app/app.js?v=40"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "server-1",
+    "name": "Primary server",
+    "location": "Germany",
+    "ssh_host": "203.0.113.10",
+    "ssh_port": 22,
+    "ssh_user": "xuiadmin",
+    "ssh_key_path": "/run/secrets/id_ed25519_server1",
+    "ssh_known_hosts_path": "/run/secrets/known_hosts",
+    "panel_url": "https://panel1.example.com:2053/secret-path",
+    "panel_api_token": "${SERVER1_PANEL_API_TOKEN}",
+    "panel_verify_tls": true,
+    "public_host": "vpn1.example.com",
+    "system_update_command": "sudo -n /usr/local/sbin/xui-system-update",
+    "panel_update_command": "sudo -n /usr/local/sbin/xui-safe-update",
+    "enable_raw_ssh": false
+  },
+  {
+    "id": "server-2",
+    "name": "Panel over SSH tunnel",
+    "location": "Netherlands",
+    "ssh_host": "203.0.113.20",
+    "ssh_port": 22,
+    "ssh_user": "xuiadmin",
+    "ssh_key_path": "/run/secrets/id_ed25519_server2",
+    "ssh_known_hosts_path": "/run/secrets/known_hosts",
+    "panel_url": "http://panel-tunnel:28481/secret-path",
+    "panel_username": "${SERVER2_PANEL_USERNAME}",
+    "panel_password": "${SERVER2_PANEL_PASSWORD}",
+    "panel_verify_tls": false,
+    "public_host": "vpn2.example.com",
+    "system_update_command": "sudo -n /usr/local/sbin/xui-system-update",
+    "panel_update_command": "sudo -n /usr/local/sbin/xui-safe-update",
+    "enable_raw_ssh": false
+  }
+]
