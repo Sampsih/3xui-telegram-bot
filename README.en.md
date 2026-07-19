@@ -28,4 +28,8 @@ The detailed documentation is currently maintained in Russian:
 - [Architecture and scaling](docs/architecture.md)
 - [Troubleshooting](docs/troubleshooting.md)
 
-Raw SSH is disabled by default and cannot be enabled for `root`. No license has been selected yet; add a `LICENSE` file before distributing the project under open-source terms.
+Raw SSH is disabled by default and cannot be enabled for `root`.
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0](LICENSE). You may use, study, modify, and distribute it, including commercially. Distributed copies and derivative works must keep the GPLv3 license and make their complete corresponding source code available.
