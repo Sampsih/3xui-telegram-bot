@@ -1,5 +1,7 @@
 # Решение проблем
 
+[English version](troubleshooting.en.md)
+
 ## `error parsing value for field servers`
 
 Проверьте JSON:

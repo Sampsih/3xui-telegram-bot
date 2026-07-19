@@ -7,7 +7,7 @@
 - Added `/ready` readiness endpoint and Docker health checks.
 - Added hardened generic Compose and optional SSH tunnel overlay.
 - Added bootstrap, configuration validation and release packaging commands.
-- Added complete user, operator and contributor documentation.
+- Added complete bilingual user, operator and contributor documentation with automated RU/EN parity checks.
 - Added GitHub Actions CI, Dependabot and issue templates.
 
 ## 4.0.0

@@ -1,10 +1,10 @@
-# Разработка
+# Development
 
-[English version](development.en.md)
+[Russian version](development.md)
 
-## Локальное окружение
+## Local environment
 
-Требуются Python 3.12+, Node.js для syntax check и Docker Compose.
+Python 3.12+, Node.js for syntax checks, and Docker Compose are required.
 
 ```bash
 python3 -m venv .venv
@@ -13,7 +13,7 @@ pip install -r backend/requirements-dev.txt
 make bootstrap
 ```
 
-Для запуска без Telegram используйте только localhost:
+To run without Telegram, use localhost only:
 
 ```dotenv
 MINI_APP_URL=http://localhost:8000/app/
@@ -25,7 +25,7 @@ ALLOWED_TELEGRAM_IDS=[1]
 PYTHONPATH=backend uvicorn app.main:app --reload --port 8000
 ```
 
-## Проверки
+## Checks
 
 ```bash
 make validate
@@ -33,7 +33,7 @@ make test
 make syntax
 ```
 
-## Структура
+## Structure
 
 ```text
 backend/app/routers/   HTTP endpoints
@@ -44,4 +44,4 @@ scripts/               host provisioning and update wrappers
 docs/                  operations documentation
 ```
 
-Не добавляйте реальные `.env`, `config/servers.json`, SSH-ключи, audit logs или базы в fixtures и commits.
+Never add real `.env` files, `config/servers.json`, SSH keys, audit logs, or databases to fixtures or commits.

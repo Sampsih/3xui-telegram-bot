@@ -1,5 +1,7 @@
 # Первая публикация на GitHub
 
+[English version](PUBLISHING.en.md)
+
 ## До публикации
 
 1. Проверьте наличие файла `LICENSE`: проект распространяется по GNU GPLv3.

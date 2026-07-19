@@ -1,5 +1,7 @@
 # Архитектура и масштабирование
 
+[English version](architecture.en.md)
+
 ## Компоненты
 
 - `bot` — aiogram polling и безопасные SSH-команды;

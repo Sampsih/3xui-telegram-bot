@@ -1,5 +1,7 @@
 # Карта репозитория
 
+[English version](repository-map.en.md)
+
 | Путь | Назначение |
 |---|---|
 | `backend/app/main.py` | FastAPI, middleware, health/readiness и Mini App |
@@ -13,6 +15,7 @@
 | `config/servers.example.json` | Безопасный пример масштабируемого инвентаря |
 | `scripts/install-managed-host` | Первичная настройка пользователя `xuiadmin` |
 | `scripts/xui-*-update` | Root-owned wrappers обновлений |
+| `scripts/validate-docs.py` | Проверка соответствия русской и английской документации |
 | `docker-compose.yml` | Основной production stack |
 | `docker-compose.tunnel.example.yml` | Опциональный SSH tunnel overlay |
 | `docs/` | Эксплуатационная и developer-документация |

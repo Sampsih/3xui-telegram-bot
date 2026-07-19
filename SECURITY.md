@@ -1,5 +1,7 @@
 # Security Policy
 
+[English version](SECURITY.en.md)
+
 ## Сообщение об уязвимости
 
 Не публикуйте рабочие exploits, токены, ключи или данные панелей в обычном issue. Используйте GitHub Private Vulnerability Reporting в разделе Security репозитория. Если владелец fork его не включил, свяжитесь с владельцем приватно.

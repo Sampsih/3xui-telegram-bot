@@ -1,5 +1,7 @@
 # Установка
 
+[English version](installation.en.md)
+
 ## 1. Что понадобится
 
 - отдельный Linux-сервер для приложения;
