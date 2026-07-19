@@ -2,7 +2,7 @@
 
 Telegram Mini App и бот для управления несколькими серверами [3x-ui](https://github.com/MHSanaei/3x-ui) через API панели и SSH.
 
-[English README](README.en.md) · [Установка](docs/installation.md) · [Использование](docs/usage.md) · [Конфигурация](docs/configuration.md) · [Решение проблем](docs/troubleshooting.md)
+[English README](README.en.md) · [Установка](docs/installation.md) · [Использование](docs/usage.md) · [Конфигурация](docs/configuration.md) · [Решение проблем](docs/troubleshooting.md) · [Поддержать](#поддержать-проект)
 
 ## Возможности
 
@@ -99,9 +99,24 @@ docker compose ps
 
 Основная цель — актуальная MHSanaei/3x-ui. Старые панели без `clients/subLinks` используют ограниченный локальный fallback генерации ссылок. Нестандартные forks могут потребовать отдельный API adapter.
 
+## Поддержать проект
+
+Если проект оказался полезен, его разработку можно поддержать любым удобным способом.
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-поддержать-FFDD00?logo=buymeacoffee&logoColor=000)](https://buymeacoffee.com/sampsih)
+
+### TON (Gram)
+
+Mainnet-адрес:
+
+```text
+UQBDpkQH_ryzYKm5iiBQLuFz32SJllk4WI3drZfjQCYFHKX4
+```
+
+[Открыть перевод в TON-кошельке](ton://transfer/UQBDpkQH_ryzYKm5iiBQLuFz32SJllk4WI3drZfjQCYFHKX4?text=Thanks%20for%203xui-telegram-bot) · [Проверить адрес в TON Viewer](https://tonviewer.com/UQBDpkQH_ryzYKm5iiBQLuFz32SJllk4WI3drZfjQCYFHKX4)
+
+Перед подтверждением перевода обязательно сверьте адрес в кошельке с указанным выше.
+
 ## Лицензия
 
 Проект распространяется по лицензии [GNU General Public License v3.0](LICENSE). Его можно использовать, изучать, изменять и распространять, в том числе коммерчески. При распространении проекта или производной версии необходимо предоставить исходный код и сохранить лицензию GPLv3.
-
-buymeacoffee.com/sampsih
-Gram (TON) UQBDpkQH_ryzYKm5iiBQLuFz32SJllk4WI3drZfjQCYFHKX4

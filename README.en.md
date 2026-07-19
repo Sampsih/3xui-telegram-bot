@@ -30,6 +30,24 @@ The detailed documentation is currently maintained in Russian:
 
 Raw SSH is disabled by default and cannot be enabled for `root`.
 
+## Support the project
+
+If this project is useful to you, you can support its continued development.
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-support-FFDD00?logo=buymeacoffee&logoColor=000)](https://buymeacoffee.com/sampsih)
+
+### TON (Gram)
+
+Mainnet address:
+
+```text
+UQBDpkQH_ryzYKm5iiBQLuFz32SJllk4WI3drZfjQCYFHKX4
+```
+
+[Open a transfer in a TON wallet](ton://transfer/UQBDpkQH_ryzYKm5iiBQLuFz32SJllk4WI3drZfjQCYFHKX4?text=Thanks%20for%203xui-telegram-bot) · [Verify the address in TON Viewer](https://tonviewer.com/UQBDpkQH_ryzYKm5iiBQLuFz32SJllk4WI3drZfjQCYFHKX4)
+
+Always verify the recipient address in your wallet before confirming a transfer.
+
 ## License
 
 This project is licensed under the [GNU General Public License v3.0](LICENSE). You may use, study, modify, and distribute it, including commercially. Distributed copies and derivative works must keep the GPLv3 license and make their complete corresponding source code available.
