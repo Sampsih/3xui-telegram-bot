@@ -19,8 +19,18 @@ awk '
   /MemAvailable:/ {available=$2*1024}
   END {printf "memory=%d,%d,%d\n", total, total-available, available}
 ' /proc/meminfo
-printf 'disk='; df -B1 --output=size,used,avail,pcent / | tail -n1 | awk '{gsub(/%/,"",$4); print $1","$2","$3","$4}'
-printf 'xui_service='; systemctl is-active x-ui 2>/dev/null || true
+printf 'disk='; df -Pk / | awk 'NR == 2 {gsub(/%/,"",$5); printf "%.0f,%.0f,%.0f,%s\n", $2*1024, $3*1024, $4*1024, $5}'
+printf 'xui_service='; {
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl is-active x-ui 2>/dev/null || true
+  elif command -v rc-service >/dev/null 2>&1; then
+    rc-service x-ui status >/dev/null 2>&1 && echo active || echo inactive
+  elif command -v service >/dev/null 2>&1; then
+    service x-ui status >/dev/null 2>&1 && echo active || echo inactive
+  else
+    echo unknown
+  fi
+}
 printf 'xui_version='; {
   /usr/local/x-ui/x-ui version 2>/dev/null || true
   /usr/local/x-ui/x-ui -v 2>/dev/null || true
@@ -38,6 +48,14 @@ fi
 printf 'os_id=%s\n' "$os_id"
 printf 'os_version=%s\n' "$os_version"
 printf 'os_pretty=%s\n' "$os_pretty"
+package_manager=unknown
+for candidate in apt-get dnf yum zypper apk pacman; do
+  if command -v "$candidate" >/dev/null 2>&1; then
+    package_manager=$candidate
+    break
+  fi
+done
+printf 'package_manager=%s\n' "$package_manager"
 """.strip()
 
 XUI_VERSION_COMMAND = r"""
@@ -47,6 +65,45 @@ XUI_VERSION_COMMAND = r"""
   x-ui version 2>/dev/null || true
   x-ui -v 2>/dev/null || true
 } | grep -Eio 'v?[0-9]+([.][0-9]+){1,3}' | tail -n1
+""".strip()
+
+UPGRADABLE_PACKAGES_COMMAND = r"""
+set -eu
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+if command -v apt >/dev/null 2>&1; then
+  apt list --upgradable 2>/dev/null | head -n 250
+elif command -v apt-get >/dev/null 2>&1; then
+  apt-get --just-print -o Debug::NoLocking=1 upgrade 2>/dev/null | sed -n 's/^Inst /Inst /p' | head -n 250
+elif command -v dnf >/dev/null 2>&1; then
+  set +e
+  output=$(dnf -q check-update 2>&1)
+  status=$?
+  set -e
+  [ "$status" -eq 0 ] || [ "$status" -eq 100 ] || { printf '%s\n' "$output" >&2; exit "$status"; }
+  printf '%s\n' "$output" | head -n 250
+elif command -v yum >/dev/null 2>&1; then
+  set +e
+  output=$(yum -q check-update 2>&1)
+  status=$?
+  set -e
+  [ "$status" -eq 0 ] || [ "$status" -eq 100 ] || { printf '%s\n' "$output" >&2; exit "$status"; }
+  printf '%s\n' "$output" | head -n 250
+elif command -v zypper >/dev/null 2>&1; then
+  set +e
+  output=$(zypper --non-interactive list-updates 2>&1)
+  status=$?
+  set -e
+  [ "$status" -eq 0 ] || [ "$status" -eq 100 ] || { printf '%s\n' "$output" >&2; exit "$status"; }
+  printf '%s\n' "$output" | head -n 250
+elif command -v apk >/dev/null 2>&1; then
+  apk version -l '<' | head -n 250
+elif command -v pacman >/dev/null 2>&1; then
+  pacman -Qu | head -n 250
+else
+  echo 'No supported package manager found (apt, dnf, yum, zypper, apk, pacman)' >&2
+  exit 69
+fi
 """.strip()
 
 
@@ -90,16 +147,23 @@ class SSHService:
 
     async def xui_logs(self, lines: int = 100) -> str:
         safe_lines = max(10, min(int(lines), 500))
-        return await self.run_fixed(
-            f"journalctl -u x-ui -n {safe_lines} --no-pager -o short-iso",
-            timeout=30,
-        )
+        command = f"""
+set -eu
+if command -v journalctl >/dev/null 2>&1; then
+  journalctl -u x-ui -n {safe_lines} --no-pager -o short-iso
+elif [ -r /var/log/x-ui.log ]; then
+  tail -n {safe_lines} /var/log/x-ui.log
+elif [ -r /var/log/x-ui/x-ui.log ]; then
+  tail -n {safe_lines} /var/log/x-ui/x-ui.log
+else
+  echo 'No supported x-ui log source was found' >&2
+  exit 69
+fi
+""".strip()
+        return await self.run_fixed(command, timeout=30)
 
     async def upgradable_packages(self) -> str:
-        return await self.run_fixed(
-            "apt list --upgradable 2>/dev/null | head -n 250",
-            timeout=60,
-        )
+        return await self.run_fixed(UPGRADABLE_PACKAGES_COMMAND, timeout=120)
 
     async def run_raw(self, command: str) -> "SSHCommandResult":
         if not self.server.enable_raw_ssh:
@@ -132,6 +196,7 @@ class SSHService:
                 "id": values.get("os_id", ""),
                 "version": values.get("os_version", ""),
                 "pretty": values.get("os_pretty", ""),
+                "package_manager": values.get("package_manager", "unknown"),
             },
         }
 
@@ -145,12 +210,18 @@ class SSHService:
             raise RuntimeError("System update command is not configured for this server")
         output = await self.run_fixed(command, timeout=self.server.system_update_timeout)
         reboot_required = "__REBOOT_REQUIRED__=yes" in output
-        clean_output = output.replace("__REBOOT_REQUIRED__=yes", "").replace(
-            "__REBOOT_REQUIRED__=no", ""
+        package_manager_match = re.search(r"^__PACKAGE_MANAGER__=([^\n]+)$", output, re.MULTILINE)
+        package_manager = package_manager_match.group(1).strip() if package_manager_match else "unknown"
+        clean_output = re.sub(
+            r"^__(?:PACKAGE_MANAGER|SYSTEM_UPDATE|REBOOT_REQUIRED)__?=[^\n]*\n?",
+            "",
+            output,
+            flags=re.MULTILINE,
         ).strip()
         return {
             "output": clean_output[-12000:],
             "reboot_required": reboot_required,
+            "package_manager": package_manager,
         }
 
     async def update_panel(self) -> str:

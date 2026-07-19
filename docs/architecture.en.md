@@ -24,6 +24,8 @@ All panel access is centralized in `backend/app/services/xui.py`. For a fork wit
 
 Jobs are stored in private JSON files. This is a simple and reliable design for one API instance. For horizontal scaling, replace JobManager with Redis/PostgreSQL and move execution to a dedicated worker. Remote wrappers already use `flock`, protecting each managed server from concurrent updates.
 
+OS updates are not tied to a distribution field in the inventory: the remote wrapper detects the package manager at runtime. When `flock` is unavailable, it uses an atomic lock directory.
+
 ## Network
 
 Only Caddy should be public. The API, bot, and tunnels live in Docker networks without host ports. Connect panels to the management host through WireGuard, a private network, or an SSH tunnel.

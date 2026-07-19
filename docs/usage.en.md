@@ -20,7 +20,17 @@ If one client is attached to multiple inbounds, the dialog asks you to select a 
 
 The button is visible only when `system_update_command` is configured. After confirmation, the backend creates a background job, starts the wrapper through SSH, and stores the result in `data/jobs`.
 
-The wrapper runs `apt-get update` and `apt-get upgrade --with-new-pkgs`. It does not reboot the server automatically.
+The wrapper detects the package manager on the server and runs its regular full package update:
+
+| Family | Command |
+|---|---|
+| Debian, Ubuntu | `apt-get update`, then `apt-get upgrade --with-new-pkgs` |
+| Oracle Linux, RHEL, Rocky, Alma | `dnf upgrade --refresh` or `yum update` |
+| openSUSE, SLES | `zypper update` |
+| Alpine | `apk upgrade` |
+| Arch | `pacman -Syu` |
+
+The server is never rebooted automatically. Debian-like systems are checked through `/var/run/reboot-required`; RHEL-like systems use `needs-restarting -r` when available.
 
 ### 3x-ui update
 
@@ -50,7 +60,7 @@ Shows the last 10–500 lines of the x-ui journal.
 /updates de-1
 ```
 
-Shows packages available in the current apt cache. The command does not run `apt-get update`.
+Shows packages available in the selected manager's current cache. The command only lists updates and does not refresh package metadata.
 
 ```text
 /ssh de-1 uname -a

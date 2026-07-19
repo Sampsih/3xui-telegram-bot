@@ -13,6 +13,8 @@
 | `backend/app/services/jobs.py` | Background jobs and their storage |
 | `frontend/` | Telegram Mini App without a separate build step |
 | `config/servers.example.json` | Safe example of a scalable inventory |
+| `scripts/install.sh` | Interactive wizard entry point |
+| `scripts/interactive_install.py` | Configuration, key, and tunnel-service generation |
 | `scripts/install-managed-host` | Initial `xuiadmin` user provisioning |
 | `scripts/xui-*-update` | Root-owned update wrappers |
 | `scripts/validate-docs.py` | Russian/English documentation parity validation |
@@ -21,4 +23,4 @@
 | `docs/` | Operations and developer documentation |
 | `.github/` | CI, Dependabot, and GitHub templates |
 
-Runtime files `.env`, `config/servers.json`, `data/`, and keys in `secrets/` must never be committed to Git.
+Runtime files `.env`, `config/servers.json`, `docker-compose.tunnel.yml`, `data/`, and keys in `secrets/` must never be committed to Git.

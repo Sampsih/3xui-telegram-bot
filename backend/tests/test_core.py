@@ -16,6 +16,7 @@ from app.models import ClientCreate
 from app.services.links import build_connection, connection_payload
 from app.services.jobs import JobManager
 from app.services.version import summarize_release_notes
+from app.services.ssh import SSHService
 from app.services.xui import _extract_connection_links
 
 
@@ -180,6 +181,34 @@ def test_background_job_persists_result(monkeypatch, tmp_path):
         asyncio.run(scenario())
     finally:
         get_settings.cache_clear()
+
+
+def test_system_update_result_extracts_manager_and_internal_markers():
+    server = ServerConfig(
+        id="ol-1",
+        name="Oracle Linux",
+        ssh_host="127.0.0.1",
+        ssh_user="xuiadmin",
+        ssh_key_path="/k",
+        ssh_known_hosts_path="/h",
+        panel_url="https://panel.local/path",
+        panel_api_token=SecretStr("token"),
+        system_update_command="sudo -n /usr/local/sbin/xui-system-update",
+    )
+    service = SSHService(server)
+
+    async def fake_run_fixed(command, timeout=30):
+        assert command == server.system_update_command
+        assert timeout == server.system_update_timeout
+        return "Updated packages\n__PACKAGE_MANAGER__=dnf\n__SYSTEM_UPDATE__=complete\n__REBOOT_REQUIRED__=yes\n"
+
+    service.run_fixed = fake_run_fixed
+    result = asyncio.run(service.system_update())
+    assert result == {
+        "output": "Updated packages",
+        "reboot_required": True,
+        "package_manager": "dnf",
+    }
 
 
 def test_servers_file_loads_inventory_and_expands_secret(monkeypatch, tmp_path):

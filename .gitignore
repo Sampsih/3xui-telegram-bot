@@ -6,6 +6,7 @@ secrets/*
 data/*
 !data/.gitkeep
 config/servers.json
+docker-compose.tunnel.yml
 __pycache__/
 *.pyc
 .pytest_cache/

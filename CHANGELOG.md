@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+
+- Added package updates for Debian/Ubuntu, Oracle Linux/RHEL/Rocky/Alma, openSUSE/SLES, Alpine, and Arch families.
+- Added runtime detection for `apt-get`, `dnf`, `yum`, `zypper`, `apk`, and `pacman`.
+- Added systemd, OpenRC, and generic service-status support.
+- Added a bilingual interactive installer for application settings and any number of managed servers.
+- Added automatic SSH key creation, verified `known_hosts` enrollment, optional remote provisioning, and multi-tunnel Compose generation.
+
 ## 1.0.0 — First public release
 
 - Added scalable `SERVERS_FILE` inventory with environment secret references.

@@ -20,7 +20,17 @@
 
 Кнопка видна только при настроенном `system_update_command`. После подтверждения backend создаёт фоновое задание, запускает wrapper по SSH и сохраняет результат в `data/jobs`.
 
-Wrapper выполняет `apt-get update` и `apt-get upgrade --with-new-pkgs`. Reboot автоматически не производится.
+Wrapper определяет пакетный менеджер непосредственно на сервере и выполняет штатное полное обновление пакетов:
+
+| Семейство | Команда |
+|---|---|
+| Debian, Ubuntu | `apt-get update`, затем `apt-get upgrade --with-new-pkgs` |
+| Oracle Linux, RHEL, Rocky, Alma | `dnf upgrade --refresh` или `yum update` |
+| openSUSE, SLES | `zypper update` |
+| Alpine | `apk upgrade` |
+| Arch | `pacman -Syu` |
+
+Автоматическая перезагрузка не выполняется. Для Debian-подобных систем проверяется `/var/run/reboot-required`, для RHEL-подобных — доступная команда `needs-restarting -r`.
 
 ### Обновление 3x-ui
 
@@ -50,7 +60,7 @@ Wrapper выполняет `apt-get update` и `apt-get upgrade --with-new-pkgs`
 /updates de-1
 ```
 
-Пакеты, доступные по текущему apt cache. Команда не выполняет `apt-get update`.
+Пакеты, доступные по текущему кэшу выбранного менеджера. Команда только показывает обновления и не обновляет metadata пакетов.
 
 ```text
 /ssh de-1 uname -a

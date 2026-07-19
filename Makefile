@@ -1,7 +1,10 @@
-.PHONY: bootstrap validate test syntax build up down logs ps security package
+.PHONY: bootstrap install validate test syntax build up down logs ps security package
 
 bootstrap:
 	./scripts/bootstrap.sh
+
+install:
+	./scripts/install.sh
 
 validate:
 	python3 scripts/validate-config.py
@@ -12,9 +15,9 @@ test:
 
 syntax:
 	python3 -m compileall -q backend/app
-	python3 -m py_compile scripts/validate-config.py scripts/validate-docs.py
+	python3 -m py_compile scripts/interactive_install.py scripts/validate-config.py scripts/validate-docs.py
 	node --check frontend/app.js
-	bash -n scripts/bootstrap.sh scripts/install-managed-host scripts/package-release.sh scripts/security-check.sh scripts/xui-safe-update scripts/xui-system-update
+	bash -n scripts/bootstrap.sh scripts/install.sh scripts/install-managed-host scripts/package-release.sh scripts/security-check.sh scripts/xui-safe-update scripts/xui-system-update
 
 build:
 	docker compose build --pull api bot

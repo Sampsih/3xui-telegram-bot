@@ -1,20 +1,93 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-exec 9>/run/lock/xui-system-update.lock
-if ! flock -n 9; then
-  echo 'Another system update is already running' >&2
-  exit 75
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+
+detect_package_manager() {
+  local candidate
+  for candidate in apt-get dnf yum zypper apk pacman; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+package_manager=$(detect_package_manager || true)
+if [[ -z "$package_manager" ]]; then
+  echo 'No supported package manager found (apt-get, dnf, yum, zypper, apk, pacman)' >&2
+  exit 69
 fi
 
-export DEBIAN_FRONTEND=noninteractive
-/usr/bin/apt-get update
-/usr/bin/apt-get -y --with-new-pkgs -o Dpkg::Options::="--force-confold" upgrade
+case ${1:-} in
+  --check)
+    printf '__PACKAGE_MANAGER__=%s\n' "$package_manager"
+    exit 0
+    ;;
+  '') ;;
+  *)
+    echo 'Usage: xui-system-update [--check]' >&2
+    exit 64
+    ;;
+esac
 
+install -d -m 0755 /run/lock
+lock_file=/run/lock/xui-system-update.lock
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$lock_file"
+  if ! flock -n 9; then
+    echo 'Another system update is already running' >&2
+    exit 75
+  fi
+else
+  lock_directory=${lock_file}.d
+  if ! mkdir "$lock_directory" 2>/dev/null; then
+    echo 'Another system update is already running' >&2
+    exit 75
+  fi
+  trap 'rmdir "$lock_directory" 2>/dev/null || true' EXIT
+fi
+
+case "$package_manager" in
+  apt-get)
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get -y --with-new-pkgs -o Dpkg::Options::="--force-confold" upgrade
+    ;;
+  dnf)
+    dnf -y upgrade --refresh
+    ;;
+  yum)
+    yum -y update
+    ;;
+  zypper)
+    zypper --non-interactive refresh
+    zypper --non-interactive update --auto-agree-with-licenses
+    ;;
+  apk)
+    apk update
+    apk upgrade
+    ;;
+  pacman)
+    pacman -Syu --noconfirm
+    ;;
+esac
+
+printf '__PACKAGE_MANAGER__=%s\n' "$package_manager"
 echo '__SYSTEM_UPDATE__=complete'
 
+reboot_required=no
 if [[ -f /var/run/reboot-required ]]; then
-  echo '__REBOOT_REQUIRED__=yes'
-else
-  echo '__REBOOT_REQUIRED__=no'
+  reboot_required=yes
+elif command -v needs-restarting >/dev/null 2>&1; then
+  set +e
+  needs-restarting -r >/dev/null 2>&1
+  needs_restarting_status=$?
+  set -e
+  if [[ $needs_restarting_status -eq 1 ]]; then
+    reboot_required=yes
+  fi
 fi
+printf '__REBOOT_REQUIRED__=%s\n' "$reboot_required"

@@ -41,6 +41,8 @@
 | `enable_raw_ssh` | Разрешить `/ssh`; запрещено с `root` |
 | `raw_ssh_timeout` | Timeout raw SSH, максимум 600 секунд |
 
+Тип ОС в инвентаре не задаётся. Backend читает `/etc/os-release`, а wrappers автоматически выбирают первый доступный менеджер из `apt-get`, `dnf`, `yum`, `zypper`, `apk` и `pacman`.
+
 ## Ссылки на переменные окружения
 
 В JSON допускается полное строковое значение `${VARIABLE_NAME}`:

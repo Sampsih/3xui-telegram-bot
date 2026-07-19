@@ -14,7 +14,7 @@ A Telegram Mini App and bot for managing multiple [3x-ui](https://github.com/MHS
 - multiple connection profiles for one client;
 - comparison of the installed 3x-ui version with the latest stable release;
 - a concise summary of release changes;
-- safe Ubuntu and 3x-ui updates with backups;
+- safe Linux package and 3x-ui updates with backups;
 - background operations with logs and status;
 - `/status`, `/logs`, and `/updates` commands directly in Telegram;
 - optional raw SSH available only through a dedicated unprivileged user;
@@ -43,10 +43,18 @@ Servers are described in `config/servers.json`, while secrets are injected from 
 
 Requirements: a Linux application host, Docker Engine with Compose v2, a domain with TCP ports 80/443 open, a Telegram bot, and SSH access to the managed servers.
 
+The interactive installer automatically creates the configuration, SSH keys, and inventory for any number of servers:
+
 ```bash
 git clone https://github.com/Sampsih/3xui-telegram-bot.git
 cd 3xui-telegram-bot
 
+make install
+```
+
+For a completely manual setup, use:
+
+```bash
 make bootstrap
 nano .env
 nano config/servers.json
@@ -56,7 +64,7 @@ make up
 docker compose ps
 ```
 
-The complete preparation of SSH users, Telegram, and panels is covered in the [installation guide](docs/installation.en.md).
+Supported families are Debian/Ubuntu (`apt-get`), Oracle Linux/RHEL/Rocky/Alma (`dnf` or `yum`), openSUSE/SLES (`zypper`), Alpine (`apk`), and Arch (`pacman`). The complete preparation of SSH users, Telegram, and panels is covered in the [installation guide](docs/installation.en.md).
 
 ## Bot commands
 

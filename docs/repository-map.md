@@ -13,6 +13,8 @@
 | `backend/app/services/jobs.py` | Фоновые задания и их хранение |
 | `frontend/` | Telegram Mini App без отдельного build step |
 | `config/servers.example.json` | Безопасный пример масштабируемого инвентаря |
+| `scripts/install.sh` | Запуск интерактивного мастера |
+| `scripts/interactive_install.py` | Создание конфигурации, ключей и tunnel services |
 | `scripts/install-managed-host` | Первичная настройка пользователя `xuiadmin` |
 | `scripts/xui-*-update` | Root-owned wrappers обновлений |
 | `scripts/validate-docs.py` | Проверка соответствия русской и английской документации |
@@ -21,4 +23,4 @@
 | `docs/` | Эксплуатационная и developer-документация |
 | `.github/` | CI, Dependabot и шаблоны GitHub |
 
-Runtime-файлы `.env`, `config/servers.json`, `data/` и ключи в `secrets/` не должны попадать в Git.
+Runtime-файлы `.env`, `config/servers.json`, `docker-compose.tunnel.yml`, `data/` и ключи в `secrets/` не должны попадать в Git.

@@ -4,91 +4,147 @@
 
 ## 1. Requirements
 
-- a dedicated Linux host for the application;
-- Docker Engine and Docker Compose v2;
-- a domain pointing to the application host;
-- open TCP ports 80 and 443;
+- any Linux application host with Docker Engine and Docker Compose v2;
+- Python 3 and an OpenSSH client for interactive setup;
+- a domain pointing to the application host and open TCP ports 80/443;
 - a Telegram bot created through BotFather;
-- root access for the initial preparation of every managed server;
-- an installed MHSanaei/3x-ui panel.
+- SSH access to the managed servers;
+- root or sudo access only for their initial provisioning;
+- an installed MHSanaei/3x-ui panel;
+- a managed Linux OS with `systemctl`, `rc-service`, or `service` and `apt-get`, `dnf`, `yum`, `zypper`, `apk`, or `pacman`.
 
-After provisioning, the application does not use root SSH. A dedicated `xuiadmin` user is created for it.
+After provisioning, the application connects as the dedicated unprivileged `xuiadmin` user, not root.
 
 ## 2. Get the project
 
 ```bash
 git clone https://github.com/Sampsih/3xui-telegram-bot.git
 cd 3xui-telegram-bot
+```
+
+## 3. Interactive installation
+
+Recommended method:
+
+```bash
+make install
+```
+
+The installer asks for:
+
+- the wizard language;
+- the domain, bot token, and administrator Telegram IDs;
+- the number of managed servers;
+- the ID, name, and location of each server;
+- the SSH address and port;
+- the public host used in connection links;
+- a direct panel URL or SSH tunnel parameters;
+- an API token or panel username and password;
+- whether to enable OS, 3x-ui, and raw SSH updates;
+- whether to provision the remote host and start Compose immediately.
+
+The script creates private `.env`, `config/servers.json`, separate keys under `secrets`, shared `known_hosts`, and, when required, `docker-compose.tunnel.yml`. Existing configuration is backed up under `data/installer-backups` before replacement.
+
+## 4. Host key verification and server provisioning
+
+For every server, the wizard obtains the host key, displays its fingerprint through `ssh-keygen -lf`, and adds it only after you confirm verification through a trusted channel. Do not accept an unknown fingerprint.
+
+With your permission, the wizard copies `install-managed-host`, `xui-system-update`, `xui-safe-update`, and the public key to the server. The remote script creates `xuiadmin`, restricted sudoers rules, and automatically detects the package manager.
+
+Initial SSH authentication may use root or a sudo-capable account. This operation does not copy its passwords or private keys into the project.
+
+## 5. Start the application
+
+If startup was skipped in the wizard:
+
+```bash
+make validate
+docker compose config -q
+docker compose up -d --build
+docker compose ps
+```
+
+Checks:
+
+```bash
+curl -fsS https://YOUR_DOMAIN/health
+curl -fsS https://YOUR_DOMAIN/ready
+```
+
+`/health` checks the process; `/ready` checks that servers are configured and the data directory is accessible.
+
+## 6. Telegram
+
+1. Create the bot through BotFather.
+2. Confirm that its token is stored in `BOT_TOKEN`.
+3. Confirm that numeric administrator Telegram IDs are present in `ALLOWED_TELEGRAM_IDS`.
+4. Set the Main Mini App or Menu Button to the URL from `MINI_APP_URL`.
+
+## 7. Completely manual setup
+
+If the interactive wizard is not needed:
+
+```bash
 make bootstrap
 ```
 
 This creates:
 
 - `.env` from the public example;
-- `config/servers.json` from the inventory example;
+- `config/servers.json` from the example inventory;
 - private `data` and `secrets` directories.
 
-## 3. Telegram
+## 8. Create an SSH key manually
 
-1. Create a bot through BotFather.
-2. Store its token in `BOT_TOKEN`.
-3. Add the numeric Telegram IDs of all administrators to `ALLOWED_TELEGRAM_IDS`.
-4. After deployment, configure the Main Mini App or Menu Button as `https://APP_DOMAIN/app/`.
-
-## 4. SSH keys
-
-Create a separate key for every server:
+Create a separate key for each server:
 
 ```bash
-ssh-keygen -t ed25519 -f secrets/id_ed25519_server1 -C xuiadmin-server1
+ssh-keygen -t ed25519 -N '' -f secrets/id_ed25519_server1 -C xuiadmin-server1
 chmod 600 secrets/id_ed25519_server1
 chmod 644 secrets/id_ed25519_server1.pub
 ```
 
-From the management host, copy the installer, wrappers, sudoers policy, and public key to a temporary directory on the managed server:
+## 9. Provision a managed host manually
+
+Copy the installer, wrappers, sudoers file, and public key into a temporary directory:
 
 ```bash
-ssh root@SERVER_HOST 'install -d -m 700 /tmp/xui-managed-host'
-scp \
+ssh -p 22 root@SERVER_HOST 'install -d -m 700 /tmp/xui-managed-host'
+scp -P 22 \
   scripts/install-managed-host \
   scripts/xui-system-update \
   scripts/xui-safe-update \
   scripts/xuiadmin.sudoers \
   secrets/id_ed25519_server1.pub \
   root@SERVER_HOST:/tmp/xui-managed-host/
-ssh root@SERVER_HOST \
+ssh -p 22 root@SERVER_HOST \
   'chmod 755 /tmp/xui-managed-host/install-managed-host && \
    /tmp/xui-managed-host/install-managed-host /tmp/xui-managed-host/id_ed25519_server1.pub'
 ```
 
-The script creates `xuiadmin`, installs the update wrappers, and validates sudoers.
-
-If SSH uses a nonstandard port, add `-p PORT` to `ssh` and `-P PORT` to `scp`.
-
-Verify access:
+Verify the new account and detected package manager:
 
 ```bash
-ssh -i secrets/id_ed25519_server1 xuiadmin@SERVER_HOST \
-  'id; systemctl is-active x-ui; sudo -n -l'
+ssh -i secrets/id_ed25519_server1 -p 22 xuiadmin@SERVER_HOST \
+  'id; sudo -n /usr/local/sbin/xui-system-update --check; sudo -n -l'
 ```
 
-## 5. known_hosts
+## 10. Add known_hosts manually
 
-Never disable host-key verification. First verify the server fingerprint through a trusted channel, then add the key:
+First verify the fingerprint through a trusted channel:
 
 ```bash
-ssh-keyscan -H -p 22 SERVER_HOST >> secrets/known_hosts
+ssh-keyscan -H -p 22 SERVER_HOST > /tmp/server-host-key
+ssh-keygen -lf /tmp/server-host-key
+cat /tmp/server-host-key >> secrets/known_hosts
 chmod 644 secrets/known_hosts
 ```
 
-## 6. `.env`
+Never disable StrictHostKeyChecking to simplify installation.
 
-```bash
-nano .env
-chmod 600 .env
-```
+## 11. Manual `.env` and inventory
 
-Required values:
+Minimum `.env` values:
 
 ```dotenv
 APP_DOMAIN=xui-admin.example.com
@@ -96,13 +152,10 @@ MINI_APP_URL=https://xui-admin.example.com/app/
 BOT_TOKEN=...
 ALLOWED_TELEGRAM_IDS=[123456789]
 SERVERS_FILE=/config/servers.json
+SERVER1_PANEL_API_TOKEN=...
 ```
 
-Panel secrets can be stored in separate variables and referenced from the inventory as `${VARIABLE_NAME}`.
-
-## 7. Server inventory
-
-Open `config/servers.json`. Remove unused examples and fill in one object for every server. Minimal example:
+Minimum `config/servers.json`:
 
 ```json
 [
@@ -125,60 +178,27 @@ Open `config/servers.json`. Remove unused examples and fill in one object for ev
 ```
 
 ```bash
-chmod 600 config/servers.json
+chmod 600 .env config/servers.json
 make validate
 ```
 
-## 8. SSH-only panel
+## 12. Panel available only through SSH
 
-Copy the overlay:
+The interactive wizard automatically creates a dedicated tunnel service for every private panel and sets `COMPOSE_FILE`. For manual setup, start with the example:
 
 ```bash
 cp docker-compose.tunnel.example.yml docker-compose.tunnel.yml
 ```
 
-Fill in `TUNNEL_*` in `.env` and use an inventory URL such as:
+Fill in its parameters and use the service address in the inventory, for example `http://panel-tunnel:28481/secret-path`. For multiple panels, create separate services with unique names.
 
-```text
-http://panel-tunnel:28481/secret-path
-```
+## 13. 3x-ui links and final verification
 
-Start with the overlay:
+Set the external Sub Domain and Sub Port in each panel's Subscription Settings. A tunneled panel must generate a public address, not localhost or a Docker service name.
 
-```bash
-docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d --build
-```
-
-For multiple private panels, create one tunnel service per panel with a unique service name and local port, or use WireGuard/private networking.
-
-## 9. Start the application
-
-```bash
-docker compose config -q
-docker compose build --pull api bot
-docker compose up -d
-docker compose ps
-docker compose logs --tail=150 api bot caddy
-```
-
-Checks:
-
-```bash
-curl -fsS https://YOUR_DOMAIN/health
-curl -fsS https://YOUR_DOMAIN/ready
-```
-
-`/health` verifies the process; `/ready` verifies that servers are configured and the data directory is available.
-
-## 10. Configure 3x-ui links
-
-Set the external Sub Domain and Sub Port in Subscription Settings on every panel. This is mandatory for panels behind an SSH tunnel: 3x-ui must generate a public address, not `localhost` or a Docker service name.
-
-## 11. Post-deployment verification
-
-1. Open the bot and run `/servers`.
+1. Run `/servers` in the bot.
 2. Check `/status SERVER_ID` and `/logs SERVER_ID 30`.
 3. Open the Mini App.
-4. Compare an existing client's link with the link shown by 3x-ui.
+4. Compare an existing client's connection link with the 3x-ui link.
 5. Create a test client and verify its QR code.
-6. Only then test update operations.
+6. Only then run OS and 3x-ui updates.

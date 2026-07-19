@@ -41,6 +41,8 @@
 | `enable_raw_ssh` | Enable `/ssh`; prohibited with `root` |
 | `raw_ssh_timeout` | Raw SSH timeout, maximum 600 seconds |
 
+The inventory does not declare an OS type. The backend reads `/etc/os-release`, while wrappers automatically select the first available manager from `apt-get`, `dnf`, `yum`, `zypper`, `apk`, and `pacman`.
+
 ## Environment-variable references
 
 JSON supports a complete string value in the form `${VARIABLE_NAME}`:
