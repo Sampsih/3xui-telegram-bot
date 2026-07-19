@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.1.0
+## 1.0.0 — First public release
 
 - Added scalable `SERVERS_FILE` inventory with environment secret references.
 - Added bounded server overview concurrency.
@@ -9,9 +9,6 @@
 - Added bootstrap, configuration validation and release packaging commands.
 - Added complete bilingual user, operator and contributor documentation with automated RU/EN parity checks.
 - Added GitHub Actions CI, Dependabot and issue templates.
-
-## 4.0.0
-
 - Switched connection links to the 3x-ui `subLinks` API.
 - Added multiple connection profiles and QR selection.
 - Added persisted background update jobs.
