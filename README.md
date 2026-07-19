@@ -2,7 +2,7 @@
 
 Telegram Mini App и бот для управления несколькими серверами [3x-ui](https://github.com/MHSanaei/3x-ui) через API панели и SSH.
 
-[English README](README.en.md) · [Установка](docs/installation.md) · [Использование](docs/usage.md) · [Конфигурация](docs/configuration.md) · [Решение проблем](docs/troubleshooting.md) · [Поддержать](#поддержать-проект)
+[English README](README.en.md) · [Установка](docs/installation.md) · [Использование](docs/usage.md) · [Конфигурация](docs/configuration.md) · [Скриншоты](#скриншоты) · [Решение проблем](docs/troubleshooting.md) · [Поддержать](#поддержать-проект)
 
 ## Возможности
 
@@ -94,6 +94,16 @@ docker compose ps
 - [Участие в разработке](CONTRIBUTING.md)
 - [История изменений](CHANGELOG.md)
 - [Первая публикация на GitHub](PUBLISHING.md)
+
+## Скриншоты
+
+Все серверы, пользователи, показатели, ссылки подключения и QR-коды ниже используют вымышленные демонстрационные данные.
+
+| Серверы | Состояние сервера |
+| --- | --- |
+| ![Список управляемых серверов](docs/screenshots/servers.jpg) | ![Состояние и действия выбранного сервера](docs/screenshots/dashboard.jpg) |
+| Пользователи и inbounds | Ссылка подключения и QR-код |
+| ![Управление пользователями и inbounds](docs/screenshots/users.jpg) | ![Окно ссылки подключения и QR-кода](docs/screenshots/connection.jpg) |
 
 ## Совместимость
 

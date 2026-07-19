@@ -2,7 +2,7 @@
 
 A Telegram Mini App and bot for managing multiple [3x-ui](https://github.com/MHSanaei/3x-ui) servers through the panel API and SSH.
 
-[Russian README](README.md) · [Installation](docs/installation.en.md) · [Usage](docs/usage.en.md) · [Configuration](docs/configuration.en.md) · [Troubleshooting](docs/troubleshooting.en.md) · [Support](#support-the-project)
+[Russian README](README.md) · [Installation](docs/installation.en.md) · [Usage](docs/usage.en.md) · [Configuration](docs/configuration.en.md) · [Screenshots](#screenshots) · [Troubleshooting](docs/troubleshooting.en.md) · [Support](#support-the-project)
 
 ## Features
 
@@ -94,6 +94,16 @@ Read [SECURITY.en.md](SECURITY.en.md) before publishing your own fork.
 - [Contributing](CONTRIBUTING.en.md)
 - [Changelog](CHANGELOG.md)
 - [First GitHub publication](PUBLISHING.en.md)
+
+## Screenshots
+
+All servers, users, metrics, connection links, and QR codes shown below use fictional demo data.
+
+| Servers | Server status |
+| --- | --- |
+| ![Managed server list](docs/screenshots/servers.jpg) | ![Selected server status and actions](docs/screenshots/dashboard.jpg) |
+| Users and inbounds | Connection link and QR code |
+| ![User and inbound management](docs/screenshots/users.jpg) | ![Connection link and QR code dialog](docs/screenshots/connection.jpg) |
 
 ## Compatibility
 
