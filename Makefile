@@ -7,7 +7,7 @@ validate:
 	python3 scripts/validate-config.py
 
 test:
-	python3 -m pytest -q backend/tests
+	PYTHONPATH=backend python3 -m pytest -q backend/tests
 
 syntax:
 	python3 -m compileall -q backend/app
