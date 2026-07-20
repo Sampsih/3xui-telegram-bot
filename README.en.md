@@ -121,6 +121,7 @@ The primary target is the current MHSanaei/3x-ui release. Older panels without `
 If this project is useful to you, you can support its continued development in any convenient way.
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-support-FFDD00?logo=buymeacoffee&logoColor=000)](https://buymeacoffee.com/sampsih)
+[![CloudTips](https://img.shields.io/badge/CloudTips-support-00AEEF)](https://pay.cloudtips.ru/p/56c624cb)
 
 ### TON (Gram)
 
