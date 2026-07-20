@@ -6,6 +6,7 @@ import json
 import time
 from urllib.parse import urlencode
 
+import httpx
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 from pydantic import SecretStr
@@ -17,7 +18,7 @@ from app.services.links import build_connection, connection_payload
 from app.services.jobs import JobManager
 from app.services.version import summarize_release_notes
 from app.services.ssh import SSHService
-from app.services.xui import _extract_connection_links
+from app.services.xui import XUIClient, _extract_connection_links
 
 
 def test_telegram_init_data_signature():
@@ -145,6 +146,104 @@ def test_raw_ssh_cannot_be_enabled_for_root():
 
 def test_vless_flow_is_opt_in():
     assert ClientCreate(inbound_id=1, email="client").flow == ""
+
+
+def test_client_creation_falls_back_to_current_3xui_api():
+    server = ServerConfig(
+        id="new-panel",
+        name="New panel",
+        ssh_host="127.0.0.1",
+        ssh_user="u",
+        ssh_key_path="/k",
+        ssh_known_hosts_path="/h",
+        panel_url="https://panel.local/secret",
+        panel_api_token=SecretStr("token"),
+    )
+    calls = []
+    created_client = None
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal created_client
+        path = request.url.path
+        calls.append(path)
+        if path.endswith("/panel/api/inbounds/get/7"):
+            clients = [created_client] if created_client else []
+            inbound = {"id": 7, "protocol": "vless", "settings": json.dumps({"clients": clients})}
+            return httpx.Response(200, json={"success": True, "obj": inbound})
+        if path.endswith("/panel/api/inbounds/addClient"):
+            return httpx.Response(404)
+        if path.endswith("/panel/api/clients/add"):
+            payload = json.loads(request.content)
+            assert payload["inboundIds"] == [7]
+            assert payload["client"]["email"] == "new-user"
+            assert payload["client"]["security"] == "auto"
+            assert payload["client"]["tgId"] == 0
+            created_client = payload["client"]
+            return httpx.Response(200, json={"success": True, "obj": {}})
+        raise AssertionError(f"Unexpected request: {request.method} {path}")
+
+    async def scenario():
+        panel = XUIClient(server)
+        await panel.client.aclose()
+        panel.client = httpx.AsyncClient(
+            base_url=panel.base_url + "/",
+            transport=httpx.MockTransport(handler),
+        )
+        try:
+            result = await panel.add_client(ClientCreate(inbound_id=7, email="new-user"))
+            assert result["client"]["email"] == "new-user"
+        finally:
+            await panel.client.aclose()
+
+    asyncio.run(scenario())
+    assert any(path.endswith("/panel/api/inbounds/addClient") for path in calls)
+    assert any(path.endswith("/panel/api/clients/add") for path in calls)
+
+
+def test_current_3xui_delete_detaches_client_used_by_other_inbounds():
+    server = ServerConfig(
+        id="new-panel",
+        name="New panel",
+        ssh_host="127.0.0.1",
+        ssh_user="u",
+        ssh_key_path="/k",
+        ssh_known_hosts_path="/h",
+        panel_url="https://panel.local/secret",
+        panel_api_token=SecretStr("token"),
+    )
+    attached = {7, 8}
+    client = {"id": "11111111-1111-1111-1111-111111111111", "email": "shared-user"}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        path = request.url.path
+        if path.endswith("/panel/api/inbounds/get/7"):
+            clients = [client] if 7 in attached else []
+            inbound = {"id": 7, "protocol": "vless", "settings": json.dumps({"clients": clients})}
+            return httpx.Response(200, json={"success": True, "obj": inbound})
+        if path.endswith("/panel/api/inbounds/7/delClient/11111111-1111-1111-1111-111111111111"):
+            return httpx.Response(404)
+        if path.endswith("/panel/api/clients/get/shared-user"):
+            return httpx.Response(200, json={"success": True, "obj": {"client": client, "inboundIds": sorted(attached)}})
+        if path.endswith("/panel/api/clients/shared-user/detach"):
+            assert json.loads(request.content) == {"inboundIds": [7]}
+            attached.discard(7)
+            return httpx.Response(200, json={"success": True})
+        raise AssertionError(f"Unexpected request: {request.method} {path}")
+
+    async def scenario():
+        panel = XUIClient(server)
+        await panel.client.aclose()
+        panel.client = httpx.AsyncClient(
+            base_url=panel.base_url + "/",
+            transport=httpx.MockTransport(handler),
+        )
+        try:
+            await panel.delete_client_by_email(7, "shared-user")
+        finally:
+            await panel.client.aclose()
+
+    asyncio.run(scenario())
+    assert attached == {8}
 
 
 def test_release_notes_summary_limits_bullets():

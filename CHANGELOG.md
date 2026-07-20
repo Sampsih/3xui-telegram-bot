@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+- Added automatic compatibility with the current 3x-ui `/panel/api/clients` creation and deletion endpoints.
+- Preserved client management through the legacy `/panel/api/inbounds` endpoints for older 3x-ui installations.
+- Prevented deletion from unrelated inbounds when a current 3x-ui client is attached to more than one inbound.
+
 ## 1.1.0
 
 - Added package updates for Debian/Ubuntu, Oracle Linux/RHEL/Rocky/Alma, openSUSE/SLES, Alpine, and Arch families.

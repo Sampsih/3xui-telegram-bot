@@ -200,7 +200,22 @@ class XUIClient:
             "id": request.inbound_id,
             "settings": json.dumps({"clients": [client]}, separators=(",", ":")),
         }
-        response = await self.request("POST", "panel/api/inbounds/addClient", json=payload)
+        try:
+            response = await self.request("POST", "panel/api/inbounds/addClient", json=payload)
+        except XUIError as exc:
+            if "HTTP 404" not in str(exc):
+                raise
+            # 3x-ui 3.x moved client mutations out of the inbounds controller.
+            # Retain the legacy call above for older panels and transparently
+            # switch to the current global-client API when that route is absent.
+            response = await self.request(
+                "POST",
+                "panel/api/clients/add",
+                json={
+                    "client": _current_api_client(protocol, client),
+                    "inboundIds": [request.inbound_id],
+                },
+            )
 
         # Some panel versions return an empty body after a successful mutation. Verify state.
         inbound_after = await self.get_inbound(request.inbound_id)
@@ -216,14 +231,42 @@ class XUIClient:
         if not client:
             raise XUIError(f"Client '{email}' not found")
         client_id = _client_identifier(protocol, client)
-        await self.request("POST", f"panel/api/inbounds/{inbound_id}/delClient/{quote(client_id, safe='')}")
+        try:
+            await self.request("POST", f"panel/api/inbounds/{inbound_id}/delClient/{quote(client_id, safe='')}")
+        except XUIError as exc:
+            if "HTTP 404" not in str(exc):
+                raise
+            await self._delete_client_current_api(inbound_id, email)
         inbound_after = await self.get_inbound(inbound_id)
         if find_client(inbound_after, email):
             # Newer panels may provide deletion by email, which is safer for some protocols.
-            await self.request("POST", f"panel/api/inbounds/{inbound_id}/delClientByEmail/{quote(email, safe='')}")
+            try:
+                await self.request("POST", f"panel/api/inbounds/{inbound_id}/delClientByEmail/{quote(email, safe='')}")
+            except XUIError as exc:
+                if "HTTP 404" not in str(exc):
+                    raise
+                await self._delete_client_current_api(inbound_id, email)
             inbound_after = await self.get_inbound(inbound_id)
         if find_client(inbound_after, email):
             raise XUIError("Client still exists after delete request")
+
+    async def _delete_client_current_api(self, inbound_id: int, email: str) -> None:
+        encoded_email = quote(email, safe="")
+        payload = await self.request("GET", f"panel/api/clients/get/{encoded_email}")
+        inbound_ids = payload.get("inboundIds") if isinstance(payload, dict) else None
+        attached_ids = {
+            int(value)
+            for value in inbound_ids or []
+            if isinstance(value, int) or (isinstance(value, str) and value.isdigit())
+        }
+        if attached_ids - {inbound_id}:
+            await self.request(
+                "POST",
+                f"panel/api/clients/{encoded_email}/detach",
+                json={"inboundIds": [inbound_id]},
+            )
+        else:
+            await self.request("POST", f"panel/api/clients/del/{encoded_email}")
 
     async def download_database(self) -> bytes:
         await self.login()
@@ -359,6 +402,32 @@ def _new_credential(protocol: str) -> str:
     if protocol in {"vless", "vmess"}:
         return str(uuid.uuid4())
     return secrets.token_urlsafe(24)
+
+
+def _current_api_client(protocol: str, legacy_client: dict[str, Any]) -> dict[str, Any]:
+    """Translate an inbound-embedded client to the 3x-ui 3.x client model."""
+    client: dict[str, Any] = {
+        "email": legacy_client["email"],
+        "enable": legacy_client["enable"],
+        "expiryTime": legacy_client["expiryTime"],
+        "limitIp": legacy_client["limitIp"],
+        "totalGB": legacy_client["totalGB"],
+        "tgId": 0,
+        "subId": legacy_client["subId"],
+        "reset": legacy_client["reset"],
+        "security": "auto",
+        "comment": "",
+    }
+    if protocol in {"vless", "vmess"}:
+        client["id"] = legacy_client["id"]
+        client["flow"] = legacy_client.get("flow", "")
+    elif protocol == "trojan":
+        client["password"] = legacy_client["password"]
+    elif protocol in {"hysteria", "hysteria2", "hy2"}:
+        client["auth"] = legacy_client["password"]
+    elif protocol == "shadowsocks":
+        client["password"] = legacy_client["password"]
+    return client
 
 
 def _client_identifier(protocol: str, client: dict[str, Any]) -> str:
